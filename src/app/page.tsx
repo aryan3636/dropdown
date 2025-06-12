@@ -1,71 +1,99 @@
-'use client'
+"use client";
 import { useEffect, useState } from "react";
 import Dropdown from "./components/BaseDropdown/Dropdown";
 import { Post } from "./components/Posts/Posts";
+import { SelectModal } from "./components/selectModal/ItemSelect";
+import ShowAll from "./components/ShowAll/ShowAll";
 
 export default function Home() {
-  const [products, setProducts] = useState<Post[]>([])
-  const [selectedPostId, setSelectedPostId] = useState('')
-  const [selectedProduct, setSelectedProduct] = useState<Post | null>(null)
-  const [loading, setLoading] = useState(true)
-  
-
+  const [products, setProducts] = useState<Post[]>([]);
+  const [selectedProduct, setSelectedProduct] = useState<Post | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [clearSearch, setClearSearch] = useState(false);
+  const [load, setLoad] = useState(false);
+  const handleShowAll = () => {
+    setSelectedProduct(null);
+    return setLoad(!load);
+  };
   useEffect(() => {
     const fetchData = async () => {
       try {
-        setLoading(true)
-        const data = await fetch('https://jsonplaceholder.typicode.com/posts')
-        const postData: Post[] = await data.json()
-        setProducts(postData)
-      } catch (err) {
-        alert('Failed to load products')
+        setLoading(true);
+        const data = await fetch("https://jsonplaceholder.typicode.com/posts");
+        const postData: Post[] = await data.json();
+        setProducts(postData);
+      } catch (error) {
+        alert("Failed to load products");
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
-    fetchData()
-  }, [])
+    };
+    fetchData();
+  }, []);
   return (
     <div className="container">
-        
-        <Dropdown 
-          label="Products" 
-          items={products} 
-          value={selectedPostId} 
-          onValueChange={(value, item) => {
-            setSelectedPostId(value);
-            setSelectedProduct(item)
-          }}
-          loading={loading}
-        />
-        
-        <div className="items-info">
-          <div >
-            {selectedProduct 
-            ? <>
-                <table className="table-auto border border-white text-white w-full max-w-md">
+      <Dropdown
+        label="Products"
+        items={products}
+        value={selectedProduct?.id || ""}
+        onValueChange={(value, item) => {
+          setSelectedProduct(item);
+          setClearSearch(false);
+        }}
+        loading={loading}
+        clearSearch={clearSearch}
+        setLoading={setLoading}
+      />
+      <button className="mt-4" onClick={handleShowAll}>
+        {load ? "Collapse All" : "Show All"}
+      </button>
+
+      {load && !selectedProduct && (
+        <ShowAll load items={products} searchResultItem={null} />
+      )}
+
+      <div className="items-info">
+        <div className="table-wrapper">
+          <SelectModal
+            shouldShow={!!selectedProduct}
+            onRequestClose={() => {
+              setSelectedProduct(null);
+              setClearSearch(true);
+            }}
+          >
+            {selectedProduct && (
+              <>
+                <table className="table-container table-auto">
                   <thead>
                     <tr>
                       <th className="border border-white px-4 py-2">UserID</th>
                       <th className="border border-white px-4 py-2">ID</th>
                       <th className="border border-white px-4 py-2">Title</th>
                       <th className="border border-white px-4 py-2">Body</th>
-                  </tr>
+                    </tr>
                   </thead>
                   <tbody>
                     <tr>
-                      <td className="border border-white px-4 py-2">{selectedProduct.userId}</td>
-                      <td className="border border-white px-4 py-2">{selectedProduct.id}</td>
-                      <td className="border border-white px-4 py-2">{selectedProduct.title}</td>
-                      <td className="border border-white px-4 py-2">{selectedProduct.body}</td>
-                  </tr>
+                      <td className="border border-white px-4 py-2">
+                        {selectedProduct.userId}
+                      </td>
+                      <td className="border border-white px-4 py-2">
+                        {selectedProduct.id}
+                      </td>
+                      <td className="border border-white px-4 py-2">
+                        {selectedProduct.title}
+                      </td>
+                      <td className="border border-white px-4 py-2">
+                        {selectedProduct.body}
+                      </td>
+                    </tr>
                   </tbody>
                 </table>
-                </>
-            : 'No product is yet selected'
-            }
-          </div>
+              </>
+            )}
+          </SelectModal>
         </div>
+      </div>
     </div>
   );
 }
