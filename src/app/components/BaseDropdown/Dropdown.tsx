@@ -2,16 +2,16 @@
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Post } from "../Posts/Posts";
-import { LinearProgress } from "@mui/material";
+import { Grid, LinearProgress } from "@mui/material";
+import { debounce } from "lodash";
 
 interface Props<DataType extends Post> {
   label: string;
   items: DataType[];
   value: string;
-  onValueChange: (value: string, selectedItem: DataType) => void;
+  onValueChange: (value: string, selectedItem: DataType | null) => void;
   loading?: boolean;
   clearSearch?: boolean;
-  setLoading: (loading: boolean) => void;
 }
 
 const Dropdown = <DataType extends Post>({
@@ -21,24 +21,61 @@ const Dropdown = <DataType extends Post>({
   onValueChange,
   loading,
   clearSearch,
-  setLoading,
 }: Props<DataType>) => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [debouncedQuery, setDebouncedQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
+
   const dropdownRef = useRef<HTMLDivElement>(null);
+
   const selectedItem = items.find((item) => item.id.toString() === value);
 
-  useEffect(() => {
-    setLoading(true);
-    const handler = setTimeout(() => {
-      setDebouncedQuery(searchQuery);
-      setLoading(false);
-    }, 1000);
-    return () => {
-      clearTimeout(handler);
-    };
-  }, [searchQuery]);
+  const debouncedSearch = useMemo(
+    () =>
+      debounce((query: string) => {
+        setIsSearching(false);
+      }, 200),
+    []
+  );
+
+  const handleItemClick = (item: DataType) => {
+    onValueChange(item.id.toString(), item);
+    setSearchQuery(item.title);
+    setIsOpen(false);
+  };
+
+  const handleClear = () => {
+    setIsResetting(true);
+
+    setTimeout(() => {
+      setSearchQuery("");
+      onValueChange("", null);
+      setIsResetting(false);
+    }, 200);
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchQuery(value);
+    setIsSearching(true);
+    debouncedSearch(value);
+    setIsOpen(true);
+    if (value === "") {
+      onValueChange("", null as unknown as DataType);
+    }
+  };
+
+  const filteredItems = useMemo(
+    () =>
+      items.filter(
+        (item) =>
+          item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          (item.body &&
+            item.body.toLowerCase().includes(searchQuery.toLowerCase()))
+      ),
+    [items, searchQuery]
+  );
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -52,7 +89,6 @@ const Dropdown = <DataType extends Post>({
         }
       }
     };
-
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         setIsOpen(false);
@@ -67,75 +103,60 @@ const Dropdown = <DataType extends Post>({
   }, [selectedItem]);
 
   useEffect(() => {
+    if (value && selectedItem) {
+      setSearchQuery(selectedItem.title);
+    }
+  }, [value, selectedItem]);
+
+  useEffect(() => {
     if (clearSearch) {
       setSearchQuery("");
     }
   }, [clearSearch]);
 
-  const handleItemClick = (item: DataType) => {
-    onValueChange(item.id.toString(), item);
-    setSearchQuery(item.title);
-    setIsOpen(false);
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
-    setLoading(false);
-    setIsOpen(true);
-  };
-
-  const handleInputClick = () => {
-    setIsOpen(true);
-  };
-
-  // const filteredItems = items.filter((item) => {
-  //   return (
-  //     item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-  //     (item.body && item.body.toLowerCase().includes(searchQuery.toLowerCase()))
-  //   )
-  // })
-
-  const filteredItems = useMemo(
-    () =>
-      items.filter(
-        (item) =>
-          item.title.toLowerCase().includes(debouncedQuery.toLowerCase()) ||
-          (item.body &&
-            item.body.toLowerCase().includes(debouncedQuery.toLowerCase()))
-      ),
-    [items, debouncedQuery]
-  );
-
   return (
-    <div ref={dropdownRef}>
+    <Grid spacing={{ xs: 2, md: 3 }} ref={dropdownRef}>
       <span className="label text-sm font-medium text-white">{label}</span>
-      <div className="input-field relative mt-1">
+      <Grid spacing={{ xs: 2, md: 3 }} className="input-field relative mt-1">
         <input
           type="text"
           value={searchQuery}
           onChange={handleInputChange}
-          placeholder={loading ? "Loading posts" : "Search with title/body"}
-          disabled={loading}
+          placeholder={loading ? "Loading..." : "Search with title/body"}
+          disabled={loading || isResetting}
           autoComplete="off"
-          onClick={handleInputClick}
-          className="border border-b-blue-50 w-full h-12 pr-9"
+          onClick={() => setIsOpen(true)}
+          className="border border-b-blue-50 w-full h-12 pr-9 pl-3"
         />
         {searchQuery && !loading && (
           <button
-            onClick={() => {
-              setSearchQuery("");
-              onValueChange("", null as unknown as DataType);
-            }}
-            className="absolute top-1/2 right-6 -translate-y-1/2 text-gray-400 hover:text-white"
+            onClick={handleClear}
+            className="absolute top-1/2 right-4 -translate-y-1/2 text-red-600 hover:text-white"
             type="button"
+            disabled={isResetting}
           >
             x
           </button>
         )}
         {isOpen && !loading && (
-          <div className="absolute z-1000 mt-1 max-h-60 w-full overflow-y-auto rounded-md border border-gray-200 bg-black shadow-lg">
-            {filteredItems.length === 0 ? (
-              <div className="px-4 py-2 text-gray-500">No items found</div>
+          <Grid
+            spacing={{ xs: 2, md: 3 }}
+            className="absolute z-1000 mt-1 max-h-60 w-full overflow-y-auto rounded-md border border-gray-200 bg-black shadow-lg"
+          >
+            {isSearching ? (
+              <Grid
+                spacing={{ xs: 2, md: 3 }}
+                className="px-4 py-2 text-gray-500"
+              >
+                Searching...
+              </Grid>
+            ) : filteredItems.length === 0 ? (
+              <Grid
+                spacing={{ xs: 2, md: 3 }}
+                className="px-4 py-2 text-gray-500"
+              >
+                No items found
+              </Grid>
             ) : (
               <ul>
                 {filteredItems.map((item) => (
@@ -143,18 +164,18 @@ const Dropdown = <DataType extends Post>({
                     key={item.id}
                     onClick={() => handleItemClick(item)}
                     className="cursor-pointer px-4 
-                    py-2 capitalize hover:bg-gray-100 hover:text-black"
+                      py-2 capitalize hover:bg-gray-100 hover:text-black"
                   >
                     {item.title}
                   </li>
                 ))}
               </ul>
             )}
-          </div>
+          </Grid>
         )}
-        {loading && <LinearProgress />}
-      </div>
-    </div>
+        {(loading || isSearching || isResetting) && <LinearProgress />}
+      </Grid>
+    </Grid>
   );
 };
 export default Dropdown;

@@ -4,11 +4,12 @@ import Dropdown from "./components/BaseDropdown/Dropdown";
 import { Post } from "./components/Posts/Posts";
 import { SelectModal } from "./components/selectModal/ItemSelect";
 import ShowAll from "./components/ShowAll/ShowAll";
+import { Grid } from "@mui/material";
 
 export default function Home() {
   const [products, setProducts] = useState<Post[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<Post | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [clearSearch, setClearSearch] = useState(false);
   const [load, setLoad] = useState(false);
   const handleShowAll = () => {
@@ -31,69 +32,77 @@ export default function Home() {
     fetchData();
   }, []);
   return (
-    <div className="container">
-      <Dropdown
-        label="Products"
-        items={products}
-        value={selectedProduct?.id || ""}
-        onValueChange={(value, item) => {
-          setSelectedProduct(item);
-          setClearSearch(false);
+    <>
+      <Grid
+        spacing={{ xs: 2, md: 3 }}
+        className="container"
+        sx={{
+          width: "100%",
+          maxWidth: {
+            md: 3 / 4,
+            lg: 2 / 3,
+          },
+          marginX: "auto",
         }}
-        loading={loading}
-        clearSearch={clearSearch}
-        setLoading={setLoading}
-      />
-      <button className="mt-4" onClick={handleShowAll}>
-        {load ? "Collapse All" : "Show All"}
-      </button>
+      >
+        <Dropdown
+          label="Products"
+          items={products}
+          value={selectedProduct?.id || ""}
+          onValueChange={(value, item) => {
+            setSelectedProduct(item);
+            setClearSearch(false);
+          }}
+          loading={loading}
+          clearSearch={clearSearch}
+        />
+        <button className="mt-4" onClick={handleShowAll}>
+          {load ? "Collapse All" : "Show All"}
+        </button>
 
-      {load && !selectedProduct && (
-        <ShowAll load items={products} searchResultItem={null} />
-      )}
+        {load && !selectedProduct && (
+          <ShowAll load items={products} searchResultItem={null} />
+        )}
 
-      <div className="items-info">
-        <div className="table-wrapper">
+        <Grid spacing={{ xs: 2, md: 3 }} className="items-info">
           <SelectModal
-            shouldShow={!!selectedProduct}
+            shouldShow={!!selectedProduct && !clearSearch}
             onRequestClose={() => {
               setSelectedProduct(null);
               setClearSearch(true);
             }}
           >
             {selectedProduct && (
-              <>
-                <table className="table-container table-auto">
-                  <thead>
-                    <tr>
-                      <th className="border border-white px-4 py-2">UserID</th>
-                      <th className="border border-white px-4 py-2">ID</th>
-                      <th className="border border-white px-4 py-2">Title</th>
-                      <th className="border border-white px-4 py-2">Body</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td className="border border-white px-4 py-2">
-                        {selectedProduct.userId}
-                      </td>
-                      <td className="border border-white px-4 py-2">
-                        {selectedProduct.id}
-                      </td>
-                      <td className="border border-white px-4 py-2">
-                        {selectedProduct.title}
-                      </td>
-                      <td className="border border-white px-4 py-2">
-                        {selectedProduct.body}
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </>
+              <table className="table-container table-auto">
+                <thead>
+                  <tr>
+                    <th className="border border-white px-4 py-2">UserID</th>
+                    <th className="border border-white px-4 py-2">ID</th>
+                    <th className="border border-white px-4 py-2">Title</th>
+                    <th className="border border-white px-4 py-2">Body</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td className="border border-white px-4 py-2">
+                      {selectedProduct.userId}
+                    </td>
+                    <td className="border border-white px-4 py-2">
+                      {selectedProduct.id}
+                    </td>
+                    <td className="border border-white px-4 py-2">
+                      {selectedProduct.title}
+                    </td>
+                    <td className="border border-white px-4 py-2">
+                      {selectedProduct.body}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             )}
           </SelectModal>
-        </div>
-      </div>
-    </div>
+        </Grid>
+      </Grid>
+    </>
   );
 }

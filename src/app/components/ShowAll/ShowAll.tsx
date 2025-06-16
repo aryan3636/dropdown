@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { Post } from "../Posts/Posts";
-import { Pagination } from "@mui/material";
+import { Grid, Pagination } from "@mui/material";
 
 interface Props<DataType extends Post> {
   items: DataType[];
@@ -40,8 +40,8 @@ const ShowAll = <DataType extends Post>({ items }: Props<DataType>) => {
   }, []);
   return (
     <>
-      <div className="items-info">
-        <div className="table-wrapper">
+      <Grid spacing={{ xs: 2, md: 3 }} className="items-info">
+        <Grid spacing={{ xs: 2, md: 3 }} className="table-wrapper">
           <table className="table-container table-auto">
             <thead>
               <tr>
@@ -62,9 +62,12 @@ const ShowAll = <DataType extends Post>({ items }: Props<DataType>) => {
               ))}
             </tbody>
           </table>
-        </div>
-      </div>
-      <div className="mt-4 flex justify-center w-full">
+        </Grid>
+      </Grid>
+      <Grid
+        spacing={{ xs: 2, md: 3 }}
+        className="mt-4 flex justify-center w-full"
+      >
         <Pagination
           className="pagination"
           count={pageCount}
@@ -72,7 +75,7 @@ const ShowAll = <DataType extends Post>({ items }: Props<DataType>) => {
           onChange={handleChange}
           color="primary"
         />
-      </div>
+      </Grid>
     </>
   );
 };
