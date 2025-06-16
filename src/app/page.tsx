@@ -38,10 +38,6 @@ export default function Home() {
         className="container"
         sx={{
           width: "100%",
-          maxWidth: {
-            md: 3 / 4,
-            lg: 2 / 3,
-          },
           marginX: "auto",
         }}
       >
@@ -66,7 +62,7 @@ export default function Home() {
 
         <Grid spacing={{ xs: 2, md: 3 }} className="items-info">
           <SelectModal
-            shouldShow={!!selectedProduct && !clearSearch}
+            shouldShow={!!selectedProduct}
             onRequestClose={() => {
               setSelectedProduct(null);
               setClearSearch(true);

@@ -141,7 +141,7 @@ const Dropdown = <DataType extends Post>({
         {isOpen && !loading && (
           <Grid
             spacing={{ xs: 2, md: 3 }}
-            className="absolute z-1000 mt-1 max-h-60 w-full overflow-y-auto rounded-md border border-gray-200 bg-black shadow-lg"
+            className="absolute z-1000 mt-1 w-full overflow-y-auto rounded-md border border-gray-200 bg-black shadow-lg"
           >
             {isSearching ? (
               <Grid
