@@ -56,9 +56,7 @@ export default function Home() {
         columnSpacing={0}
         sx={pageGridContainer}
       >
-        <Grid spacing={{ xs: 12 }}>
-          <Typography sx={productsLabel}>Products</Typography>
-        </Grid>
+        <Typography sx={productsLabel}>Products</Typography>
         <Grid spacing={{ xs: 12, md: 6, lg: 4 }} sx={dropdownGrid}>
           <Dropdown
             items={products}

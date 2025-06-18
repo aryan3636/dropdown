@@ -44,7 +44,15 @@ export const pagination = {
   display: "flex",
   justifyContent: "center",
   button: {
-    color: "#fff",
     border: "1px solid #fff ",
+  },
+  "& .MuiPaginationItem-root": {
+    color: "#fff",
+  },
+  "& .Mui-selected": {
+    backgroundColor: "#8ab4f8",
+  },
+  "& .Mui-selected:hover": {
+    backgroundColor: "#d55e5e",
   },
 };

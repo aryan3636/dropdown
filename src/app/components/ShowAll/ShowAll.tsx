@@ -62,17 +62,10 @@ const ShowAll = <DataType extends Post>({
           {paginatedItems.map((item) => (
             <Grid key={item.id} sx={itemsGrid}>
               <Typography variant="h6">{item.id}</Typography>
-              <Typography
-                component="a"
-                href="#"
-                sx={itemsTitle}
-                onClick={() => handleItemClick(item)}
-              >
+              <Typography sx={itemsTitle} onClick={() => handleItemClick(item)}>
                 {item.title}
               </Typography>
-              <Typography variant="body1" sx={itemsBody}>
-                {item.body}
-              </Typography>
+              <Typography sx={itemsBody}>{item.body}</Typography>
             </Grid>
           ))}
         </Grid>

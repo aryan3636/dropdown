@@ -1,5 +1,6 @@
-import { Grid } from "@mui/material";
+import { Button, Grid } from "@mui/material";
 import { ReactNode, useEffect, useState } from "react";
+import { closeButton, modalBodyGrid, modalContainerGrid } from "./ModalStyles";
 
 interface Props {
   shouldShow: boolean;
@@ -23,15 +24,12 @@ export const SelectModal = ({
   }, [shouldShow]);
   return (
     visible && (
-      <Grid spacing={{ xs: 2, md: 3 }} className="modal-content">
-        <Grid spacing={{ xs: 2, md: 3 }} className="modal-body">
+      <Grid spacing={{ xs: 2, md: 3 }} sx={modalContainerGrid}>
+        <Grid spacing={{ xs: 2, md: 3 }} sx={modalBodyGrid}>
           {children}
-          <button
-            className="close-button text-xl cursor-pointer"
-            onClick={onRequestClose}
-          >
+          <Button sx={closeButton} onClick={onRequestClose}>
             Close
-          </button>
+          </Button>
         </Grid>
       </Grid>
     )
