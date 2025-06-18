@@ -12,6 +12,7 @@
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
     "@mui/material": "^7.1.1",
+    "@re-dev/react-truncate": "^0.5.1",
     "lodash": "^4.17.21",
     "mui": "^0.0.1",
     "next": "15.3.3",

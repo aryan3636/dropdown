@@ -1,3 +1,4 @@
+import { Grid } from "@mui/material";
 import { ReactNode, useEffect, useState } from "react";
 
 interface Props {
@@ -17,16 +18,13 @@ export const SelectModal = ({
     if (shouldShow) {
       setVisibility(true);
     } else {
-      const timeout = setTimeout(() => setVisibility(false), 400);
-      return () => clearTimeout(timeout);
+      setVisibility(false);
     }
   }, [shouldShow]);
   return (
     visible && (
-      <div
-        className={`${shouldShow ? "modal-content" : "close-modal-content"}`}
-      >
-        <div className="modal-body">
+      <Grid spacing={{ xs: 2, md: 3 }} className="modal-content">
+        <Grid spacing={{ xs: 2, md: 3 }} className="modal-body">
           {children}
           <button
             className="close-button text-xl cursor-pointer"
@@ -34,8 +32,8 @@ export const SelectModal = ({
           >
             Close
           </button>
-        </div>
-      </div>
+        </Grid>
+      </Grid>
     )
   );
 };

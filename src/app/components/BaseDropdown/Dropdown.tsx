@@ -2,20 +2,27 @@
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Post } from "../Posts/Posts";
-import { Grid, LinearProgress } from "@mui/material";
+import { Box, Button, Grid, TextField, LinearProgress } from "@mui/material";
 import { debounce } from "lodash";
+import {
+  boxContainer,
+  boxTitleDropdown,
+  clearButton,
+  noItemsFoundBox,
+  searchingBox,
+  textFieldStyles,
+  titleBoxNames,
+} from "./DropdownStyles";
 
 interface Props<DataType extends Post> {
-  label: string;
   items: DataType[];
   value: string;
-  onValueChange: (value: string, selectedItem: DataType | null) => void;
+  onValueChange: (selectedItem: DataType | null) => void;
   loading?: boolean;
   clearSearch?: boolean;
 }
 
 const Dropdown = <DataType extends Post>({
-  label,
   items,
   value,
   onValueChange,
@@ -28,7 +35,6 @@ const Dropdown = <DataType extends Post>({
   const [isResetting, setIsResetting] = useState(false);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
-
   const selectedItem = items.find((item) => item.id.toString() === value);
 
   const debouncedSearch = useMemo(
@@ -40,17 +46,16 @@ const Dropdown = <DataType extends Post>({
   );
 
   const handleItemClick = (item: DataType) => {
-    onValueChange(item.id.toString(), item);
+    onValueChange(item);
     setSearchQuery(item.title);
     setIsOpen(false);
   };
 
   const handleClear = () => {
     setIsResetting(true);
-
     setTimeout(() => {
       setSearchQuery("");
-      onValueChange("", null);
+      onValueChange(null);
       setIsResetting(false);
     }, 200);
   };
@@ -62,7 +67,7 @@ const Dropdown = <DataType extends Post>({
     debouncedSearch(value);
     setIsOpen(true);
     if (value === "") {
-      onValueChange("", null as unknown as DataType);
+      onValueChange(null as unknown as DataType);
     }
   };
 
@@ -115,67 +120,48 @@ const Dropdown = <DataType extends Post>({
   }, [clearSearch]);
 
   return (
-    <Grid spacing={{ xs: 2, md: 3 }} ref={dropdownRef}>
-      <span className="label text-sm font-medium text-white">{label}</span>
-      <Grid spacing={{ xs: 2, md: 3 }} className="input-field relative mt-1">
-        <input
-          type="text"
+    <Grid container spacing={{ xs: 2, md: 3 }} ref={dropdownRef}>
+      <Box sx={boxContainer}>
+        <TextField
           value={searchQuery}
           onChange={handleInputChange}
+          onFocus={() => setIsOpen(true)}
           placeholder={loading ? "Loading..." : "Search with title/body"}
-          disabled={loading || isResetting}
           autoComplete="off"
-          onClick={() => setIsOpen(true)}
-          className="border border-b-blue-50 w-full h-12 pr-9 pl-3"
+          disabled={loading || isResetting}
+          sx={textFieldStyles}
         />
-        {searchQuery && !loading && (
-          <button
-            onClick={handleClear}
-            className="absolute top-1/2 right-4 -translate-y-1/2 text-red-600 hover:text-white"
-            type="button"
-            disabled={isResetting}
-          >
-            x
-          </button>
-        )}
+
         {isOpen && !loading && (
-          <Grid
-            spacing={{ xs: 2, md: 3 }}
-            className="absolute z-1000 mt-1 w-full overflow-y-auto rounded-md border border-gray-200 bg-black shadow-lg"
-          >
+          <Box sx={boxTitleDropdown}>
             {isSearching ? (
-              <Grid
-                spacing={{ xs: 2, md: 3 }}
-                className="px-4 py-2 text-gray-500"
-              >
-                Searching...
-              </Grid>
+              <Box sx={searchingBox}>Searching...</Box>
             ) : filteredItems.length === 0 ? (
-              <Grid
-                spacing={{ xs: 2, md: 3 }}
-                className="px-4 py-2 text-gray-500"
-              >
-                No items found
-              </Grid>
+              <Box sx={noItemsFoundBox}>No items found</Box>
             ) : (
-              <ul>
-                {filteredItems.map((item) => (
-                  <li
-                    key={item.id}
-                    onClick={() => handleItemClick(item)}
-                    className="cursor-pointer px-4 
-                      py-2 capitalize hover:bg-gray-100 hover:text-black"
-                  >
-                    {item.title}
-                  </li>
-                ))}
-              </ul>
+              filteredItems.map((item) => (
+                <Box
+                  key={item.id}
+                  onClick={() => handleItemClick(item)}
+                  sx={titleBoxNames}
+                >
+                  {item.title}
+                </Box>
+              ))
             )}
-          </Grid>
+          </Box>
         )}
+
+        {searchQuery && !loading && (
+          <Button onClick={handleClear} sx={clearButton}>
+            x
+          </Button>
+        )}
+
         {(loading || isSearching || isResetting) && <LinearProgress />}
-      </Grid>
+      </Box>
     </Grid>
   );
 };
+
 export default Dropdown;

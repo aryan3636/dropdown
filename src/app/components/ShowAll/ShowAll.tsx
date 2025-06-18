@@ -1,19 +1,36 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { Post } from "../Posts/Posts";
-import { Grid, Pagination } from "@mui/material";
+import { Pagination, Typography } from "@mui/material";
+import Grid from "@mui/material/Grid";
+import {
+  itemsBody,
+  itemsGrid,
+  itemsTitle,
+  pagination,
+  showAllContainerBox,
+} from "./ShowAllStyles.js";
 
 interface Props<DataType extends Post> {
   items: DataType[];
   load: boolean;
   searchResultItem: DataType | null;
+  onValueChange: (selectedItem: DataType | null) => void;
 }
 
-const ShowAll = <DataType extends Post>({ items }: Props<DataType>) => {
+const ShowAll = <DataType extends Post>({
+  items,
+  onValueChange,
+}: Props<DataType>) => {
   const [products, setProducts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const itemsPerPage = 10;
+
+  const handleItemClick = (item: DataType) => {
+    onValueChange(item);
+  };
+
   const handleChange = (_event: React.ChangeEvent<unknown>, value: number) => {
     setPage(value);
   };
@@ -39,44 +56,40 @@ const ShowAll = <DataType extends Post>({ items }: Props<DataType>) => {
     fetchData();
   }, []);
   return (
-    <>
-      <Grid spacing={{ xs: 2, md: 3 }} className="items-info">
-        <Grid spacing={{ xs: 2, md: 3 }} className="table-wrapper">
-          <table className="table-container table-auto">
-            <thead>
-              <tr>
-                <th>UserID</th>
-                <th>ID</th>
-                <th>Title</th>
-                <th>Body</th>
-              </tr>
-            </thead>
-            <tbody>
-              {paginatedItems.map((item) => (
-                <tr key={item.id}>
-                  <td>{item.userId}</td>
-                  <td>{item.id}</td>
-                  <td>{item.title}</td>
-                  <td>{item.body}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+    <Grid container spacing={2} direction="column">
+      <Grid sx={showAllContainerBox}>
+        <Grid container direction="column" spacing={2}>
+          {paginatedItems.map((item) => (
+            <Grid key={item.id} sx={itemsGrid}>
+              <Typography variant="h6">{item.id}</Typography>
+              <Typography
+                component="a"
+                href="#"
+                sx={itemsTitle}
+                onClick={() => handleItemClick(item)}
+              >
+                {item.title}
+              </Typography>
+              <Typography variant="body1" sx={itemsBody}>
+                {item.body}
+              </Typography>
+            </Grid>
+          ))}
         </Grid>
       </Grid>
-      <Grid
-        spacing={{ xs: 2, md: 3 }}
-        className="mt-4 flex justify-center w-full"
-      >
+
+      <Grid spacing={{ xs: 12 }}>
         <Pagination
-          className="pagination"
           count={pageCount}
           page={page}
           onChange={handleChange}
-          color="primary"
+          variant="outlined"
+          color="secondary"
+          shape="rounded"
+          sx={pagination}
         />
       </Grid>
-    </>
+    </Grid>
   );
 };
 
